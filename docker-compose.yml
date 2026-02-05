@@ -1,0 +1,61 @@
+# Docker Compose for Trademark Monitor
+# =====================================
+#
+# Usage:
+#   docker-compose up -d              # Start all services
+#   docker-compose up dashboard       # Start dashboard only
+#   docker-compose logs -f monitor    # View monitor logs
+#   docker-compose down               # Stop all services
+
+version: '3.8'
+
+services:
+  # Scheduled monitoring service
+  monitor:
+    build: .
+    container_name: trademark-monitor
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config:/app/config
+    env_file:
+      - .env
+    command: python run_monitor.py --schedule
+
+  # Web dashboard
+  dashboard:
+    build: .
+    container_name: trademark-dashboard
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config:/app/config
+    env_file:
+      - .env
+    command: >
+      sh -c "streamlit run dashboard/app.py
+             --server.port=8501
+             --server.address=0.0.0.0
+             --browser.gatherUsageStats=false"
+
+  # One-time scan (manual trigger)
+  scan:
+    build: .
+    container_name: trademark-scan
+    profiles:
+      - manual
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config:/app/config
+    env_file:
+      - .env
+    command: python run_monitor.py --days 7
+
+volumes:
+  data:
+  logs:

@@ -1,0 +1,114 @@
+# Trademark Monitor Configuration
+# ================================
+
+# Your trademarks to monitor
+trademarks:
+  - name: "TOPO"
+    serial_numbers:
+      - "99634122"  # Class 9
+      - "99634130"  # Class 42
+    classes:
+      - 9
+      - 42
+
+  - name: "TOPOLOGY"
+    serial_numbers:
+      - "99634140"  # Class 9
+      - "99634135"  # Class 42
+    classes:
+      - 9
+      - 42
+
+# Classes to monitor for conflicts
+monitored_classes:
+  - 9   # Downloadable software, mobile apps
+  - 42  # Online software services, social networking
+
+# Keywords in goods/services that increase concern
+high_priority_keywords:
+  - "software"
+  - "mobile"
+  - "application"
+  - "app"
+  - "social"
+  - "networking"
+  - "platform"
+  - "downloadable"
+  - "online"
+  - "saas"
+  - "cloud"
+  - "internet"
+  - "computer"
+  - "digital"
+
+# Similarity matching settings
+similarity:
+  # Minimum similarity score to flag (0-100)
+  min_score: 65
+
+  # Weights for different similarity factors
+  weights:
+    exact_match: 100
+    starts_with: 85
+    contains: 70
+    phonetic: 75
+    levenshtein: 1.0  # Multiplier for Levenshtein-based score
+
+  # Patterns to specifically watch
+  watch_patterns:
+    - "^TOPO"           # Starts with TOPO
+    - "TOPO$"           # Ends with TOPO
+    - "^TOPOLOGY"       # Starts with TOPOLOGY
+    - "TOPOL"           # Contains TOPOL
+    - "TOPO.*LOGY"      # TOPO...LOGY pattern
+
+# Alert settings
+alerts:
+  email:
+    enabled: true
+    smtp_server: "${SMTP_SERVER}"
+    smtp_port: 587
+    username: "${SMTP_USERNAME}"
+    password: "${SMTP_PASSWORD}"
+    from_address: "${ALERT_FROM_EMAIL}"
+    to_addresses:
+      - "${ALERT_TO_EMAIL}"
+
+  slack:
+    enabled: true
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+    channel: "#trademark-alerts"
+
+# Database settings
+database:
+  path: "data/trademark_monitor.db"
+
+# USPTO data settings
+uspto:
+  # Base URL for daily XML files
+  bulk_data_url: "https://bulkdata.uspto.gov/data/trademark/dailyxml/applications"
+
+  # TSDR API for detailed lookups
+  tsdr_api_url: "https://tsdrapi.uspto.gov/ts/cd"
+
+  # Number of days to look back on first run
+  initial_lookback_days: 30
+
+  # Data directory for downloaded files
+  data_dir: "data/uspto_xml"
+
+# Monitoring schedule
+schedule:
+  # Days of week to run (0=Monday, 6=Sunday)
+  # USPTO typically publishes Tuesday-Friday
+  run_days: [1, 2, 3, 4, 5]  # Tuesday-Saturday (checking previous day's filings)
+
+  # Time to run (24-hour format)
+  run_time: "08:00"
+
+# Logging
+logging:
+  level: "INFO"
+  file: "logs/trademark_monitor.log"
+  max_size_mb: 10
+  backup_count: 5
