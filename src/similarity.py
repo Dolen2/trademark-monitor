@@ -376,7 +376,7 @@ class TrademarkSimilarity:
         Returns analysis result if it's a potential conflict, None otherwise.
         """
         mark_text = filing.get('mark_text', '')
-        classes = filing.get('classes', [])
+        classes = filing.get('classes', []) or filing.get('international_classes', [])
         goods_services = filing.get('goods_services', '')
 
         # First check class relevance
